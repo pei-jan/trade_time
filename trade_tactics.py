@@ -8,6 +8,9 @@ import yaml
 # from yahoo_finance_api2.exceptions import YahooFinanceError
 import pandas as pd
 import numpy as np
+import streamlit as st
+
+st.title=('交易策略實驗室')
 
 PERIOD_TYPE_DAY = 'day'
 PERIOD_TYPE_WEEK = 'week'
@@ -147,28 +150,28 @@ class Share(object):
     def _frequency_str(self, frequency_type, frequency):
         return '{1}{0}'.format(frequency_type, frequency)
 
-
-
+查詢股票 = st.text_input("輸入查詢股票(如AAPL、TSLA)")
+查詢期間 = st.text_input("輸入查詢期間(月)(如12代表1年)")
 
 import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
 import numpy as np
 
-df = get_historical_quote('TSLA', 24)
+df = get_historical_quote(查詢股票 , int(查詢期間))
 
 
 
 sma_short = pd.DataFrame()
 sma_short['date'] = df['date']
 sma_short['adjclose'] = df['adjclose'].rolling(window=22).mean()
-sma_short.loc[15:30]
+#sma_short.loc[15:30]
 
 
 sma_long = pd.DataFrame()
 sma_long['date'] = df['date']
 sma_long['adjclose'] = df['adjclose'].rolling(window=66).mean()
-sma_long.loc[60:180]
+#sma_long.loc[60:180]
 
 
 
@@ -239,7 +242,7 @@ plt.scatter(df['date'], signal_buy, c='r', marker='^', s=150)
 plt.scatter(df['date'], signal_sell, c='g', marker='^', s=150)
 
 plt.legend()
-
+st.plotly_chart(plt,)
 
 
 # 計算損益(profit/loss)
@@ -272,8 +275,7 @@ def calc_profit(df_buy, df_sell, df):
         profit += df_date.loc[row['date'], 'adjclose'] * balance
     
     return profit
-    
-calc_profit(df_buy, df_sell, df)    
-
+       
+st.markdown('期間損益總計',calc_profit(df_buy, df_sell, df))
 
 
