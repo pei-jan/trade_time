@@ -151,7 +151,7 @@ class Share(object):
         return '{1}{0}'.format(frequency_type, frequency)
 
 查詢股票 = st.text_input("輸入查詢股票(如AAPL、TSLA)")
-查詢期間 = streamlit.number_input("輸入查詢期間(月)(如12代表1年)")
+查詢期間 = st.number_input("輸入查詢期間(月)(如12代表1年)")
 
 import pandas as pd
 import seaborn as sns
