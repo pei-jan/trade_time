@@ -158,119 +158,121 @@ import seaborn as sns
 import matplotlib.pyplot as plt
 import numpy as np
 
-df = get_historical_quote(查詢股票 , 查詢期間)
-st.dataframe(df)
+start = st.button("<<START>>")
+if start:
+    df = get_historical_quote(查詢股票 , 查詢期間)
+    st.dataframe(df)
 
 
-sma_short = pd.DataFrame()
-sma_short['date'] = df['date']
-sma_short['adjclose'] = df['adjclose'].rolling(window=22).mean()
-#sma_short.loc[15:30]
+    sma_short = pd.DataFrame()
+    sma_short['date'] = df['date']
+    sma_short['adjclose'] = df['adjclose'].rolling(window=22).mean()
+    #sma_short.loc[15:30]
 
 
-sma_long = pd.DataFrame()
-sma_long['date'] = df['date']
-sma_long['adjclose'] = df['adjclose'].rolling(window=66).mean()
-#sma_long.loc[60:180]
+    sma_long = pd.DataFrame()
+    sma_long['date'] = df['date']
+    sma_long['adjclose'] = df['adjclose'].rolling(window=66).mean()
+    #sma_long.loc[60:180]
 
 
 
 
-def buy_sell(df):
-    signal_buy = []  # 買點價格
-    signal_sell = [] # 賣點價格
-    
-    flag=-1          # 買賣點旗標，短期超過長期為1，反之為0
-    
-    # 掃描每一筆資料
-    for index, row in df.iterrows():
-        # 短期超過長期
-        if row[df.columns[1]] > row[df.columns[2]]:
-            if flag!=1: # 之前的短期未超過長期，即黃金交叉
-                signal_buy.append(row[df.columns[3]])
-                signal_sell.append(np.nan)
-                flag=1
+    def buy_sell(df):
+        signal_buy = []  # 買點價格
+        signal_sell = [] # 賣點價格
+
+        flag=-1          # 買賣點旗標，短期超過長期為1，反之為0
+
+        # 掃描每一筆資料
+        for index, row in df.iterrows():
+            # 短期超過長期
+            if row[df.columns[1]] > row[df.columns[2]]:
+                if flag!=1: # 之前的短期未超過長期，即黃金交叉
+                    signal_buy.append(row[df.columns[3]])
+                    signal_sell.append(np.nan)
+                    flag=1
+                else:
+                    signal_buy.append(np.nan)
+                    signal_sell.append(np.nan)
+            elif row[df.columns[1]] < row[df.columns[2]]:
+                if flag!=0: # 之前的長期未超過短期，即死亡交叉
+                    signal_buy.append(np.nan)
+                    signal_sell.append(row[df.columns[3]])
+                    flag=0
+                else:
+                    signal_buy.append(np.nan)
+                    signal_sell.append(np.nan)
             else:
                 signal_buy.append(np.nan)
                 signal_sell.append(np.nan)
-        elif row[df.columns[1]] < row[df.columns[2]]:
-            if flag!=0: # 之前的長期未超過短期，即死亡交叉
-                signal_buy.append(np.nan)
-                signal_sell.append(row[df.columns[3]])
-                flag=0
-            else:
-                signal_buy.append(np.nan)
-                signal_sell.append(np.nan)
-        else:
-            signal_buy.append(np.nan)
-            signal_sell.append(np.nan)
-    return (signal_buy, signal_sell)
+        return (signal_buy, signal_sell)
 
 
-# 合併短期與長期移動平均線
-df_new = sma_short.copy()
-df_new = df_new.rename({'adjclose':'sma_short'}, axis=1)
-df_new.insert(2, 'sma_long', sma_long['adjclose'])
-df_new.insert(3, 'adjclose', df['adjclose'])
+    # 合併短期與長期移動平均線
+    df_new = sma_short.copy()
+    df_new = df_new.rename({'adjclose':'sma_short'}, axis=1)
+    df_new.insert(2, 'sma_long', sma_long['adjclose'])
+    df_new.insert(3, 'adjclose', df['adjclose'])
 
 
-signal_buy, signal_sell = buy_sell(df_new)
-# 買點
-df_buy = pd.DataFrame({'date': df['date'], 'signal_buy':signal_buy})
-df_buy = df_buy[~np.isnan(signal_buy)]
+    signal_buy, signal_sell = buy_sell(df_new)
+    # 買點
+    df_buy = pd.DataFrame({'date': df['date'], 'signal_buy':signal_buy})
+    df_buy = df_buy[~np.isnan(signal_buy)]
 
 
-# 賣點
-df_sell = pd.DataFrame({'date': df['date'], 'signal_sell':signal_sell})
-df_sell = df_sell[~np.isnan(signal_sell)]
+    # 賣點
+    df_sell = pd.DataFrame({'date': df['date'], 'signal_sell':signal_sell})
+    df_sell = df_sell[~np.isnan(signal_sell)]
 
 
 
 
-plt.figure(figsize=(10,6))
-sns.lineplot(x='date', y='adjclose', data=sma_short, color='g', label='short_term')
-sns.lineplot(x='date', y='adjclose', data=sma_long, color='b', label='long_term')
+    plt.figure(figsize=(10,6))
+    sns.lineplot(x='date', y='adjclose', data=sma_short, color='g', label='short_term')
+    sns.lineplot(x='date', y='adjclose', data=sma_long, color='b', label='long_term')
 
-plt.plot(df['date'], df['adjclose'], color='r', alpha=0.5, label='date_price')
-plt.scatter(df['date'], signal_buy, c='r', marker='^', s=150)
-plt.scatter(df['date'], signal_sell, c='g', marker='^', s=150)
+    plt.plot(df['date'], df['adjclose'], color='r', alpha=0.5, label='date_price')
+    plt.scatter(df['date'], signal_buy, c='r', marker='^', s=150)
+    plt.scatter(df['date'], signal_sell, c='g', marker='^', s=150)
 
-plt.legend()
-st.set_option('deprecation.showPyplotGlobalUse', False)
-st.pyplot()
+    plt.legend()
+    st.set_option('deprecation.showPyplotGlobalUse', False)
+    st.pyplot()
 
 
-# 計算損益(profit/loss)
-def calc_profit(df_buy, df_sell, df):
-    df_profit = df_buy.merge(df_sell, on='date', how='outer') 
-    df_profit.sort_values(by='date', inplace=True)
+    # 計算損益(profit/loss)
+    def calc_profit(df_buy, df_sell, df):
+        df_profit = df_buy.merge(df_sell, on='date', how='outer') 
+        df_profit.sort_values(by='date', inplace=True)
 
-    df_date = df.set_index('date')
+        df_date = df.set_index('date')
 
-    balance=0
-    profit=0
-    cost=0
-    for index, row in df_profit.iterrows():
-        if not row['signal_buy'] is None:
-            balance+=1
-            cost+=df_date.loc[row['date'], 'adjclose']
-        elif not row['signal_sell'] is None:
-            if balance>0:
-                avg_cost = cost / balance
-                profit += df_date.loc[row['date'], 'adjclose'] - avg_cost
-                cost -= avg_cost
-            else:
-                profit += df_date.loc[row['date'], 'adjclose']
+        balance=0
+        profit=0
+        cost=0
+        for index, row in df_profit.iterrows():
+            if not row['signal_buy'] is None:
+                balance+=1
+                cost+=df_date.loc[row['date'], 'adjclose']
+            elif not row['signal_sell'] is None:
+                if balance>0:
+                    avg_cost = cost / balance
+                    profit += df_date.loc[row['date'], 'adjclose'] - avg_cost
+                    cost -= avg_cost
+                else:
+                    profit += df_date.loc[row['date'], 'adjclose']
 
-            balance-=1
+                balance-=1
 
-    if balance>0:
-        profit += df_date.loc[row['date'], 'adjclose'] * balance - cost
-    elif balance<0:
-        profit += df_date.loc[row['date'], 'adjclose'] * balance
-    
-    return profit
-       
-st.markdown('期間損益總計',calc_profit(df_buy, df_sell, df))
+        if balance>0:
+            profit += df_date.loc[row['date'], 'adjclose'] * balance - cost
+        elif balance<0:
+            profit += df_date.loc[row['date'], 'adjclose'] * balance
+
+        return profit
+    ttprofit = calc_profit(df_buy, df_sell, df)
+    st.markdown('期間損益總計',ttprofit)
 
 
