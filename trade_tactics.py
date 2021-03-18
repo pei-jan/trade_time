@@ -9,9 +9,14 @@ import yaml
 import pandas as pd
 import numpy as np
 import streamlit as st
+import pandas as pd
+import seaborn as sns
+import matplotlib.pyplot as plt
+import numpy as np
 
+st.title('招標網團險案件查詢')
 st.markdown('查詢單一股票買賣點')
-st.title('交易策略實驗室')
+
 
 PERIOD_TYPE_DAY = 'day'
 PERIOD_TYPE_WEEK = 'week'
@@ -154,10 +159,7 @@ class Share(object):
 查詢股票 = st.text_input("輸入查詢股票(如AAPL、TSLA)")
 查詢期間 = st.number_input("輸入查詢期間(月)(如12代表1年)",value=12)
 
-import pandas as pd
-import seaborn as sns
-import matplotlib.pyplot as plt
-import numpy as np
+
 
 start = st.button("<<START>>")
 if start:
