@@ -14,7 +14,7 @@ import seaborn as sns
 import matplotlib.pyplot as plt
 import numpy as np
 
-st.title('招標網團險案件查詢')
+st.title('')
 st.markdown('查詢單一股票買賣點')
 
 
