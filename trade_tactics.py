@@ -273,6 +273,6 @@ if start:
 
         return profit
     ttprofit = calc_profit(df_buy, df_sell, df)
-    st.markdown(ttprofit)
+    st.markdown('期間總獲利%.2f'%str(ttprofit))
 
 
