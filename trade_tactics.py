@@ -9,7 +9,7 @@ import yaml
 import pandas as pd
 import numpy as np
 import streamlit as st
-st.title("交易策略實驗室")
+st.title('交易策略實驗室')
 st.markdown('查詢單一股票買賣點')
 
 PERIOD_TYPE_DAY = 'day'
