@@ -15,7 +15,7 @@ import seaborn as sns
 import matplotlib.pyplot as plt
 import numpy as np
 
-st.markdown('交易策略實驗室')
+st.markdown(f'<p><span style = "font-size:24px"><strong>交易策略實驗室</strong></span></p>',unsafe_allow_html=True)
 st.markdown('查詢單一股票買賣點')
 
 
