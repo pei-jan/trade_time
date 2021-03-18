@@ -151,15 +151,16 @@ class Share(object):
         return '{1}{0}'.format(frequency_type, frequency)
 
 查詢股票 = st.text_input("輸入查詢股票(如AAPL、TSLA)")
-查詢期間 = st.number_input("輸入查詢期間(月)(如12代表1年)")
+查詢期間 = st.number_input("輸入查詢期間(月)(如12代表1年)",value=12)
 
 import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
 import numpy as np
+import plotly.express as px
 
 df = get_historical_quote(查詢股票 , 查詢期間)
-
+st.dataframe(df)
 
 
 sma_short = pd.DataFrame()
@@ -173,13 +174,6 @@ sma_long['date'] = df['date']
 sma_long['adjclose'] = df['adjclose'].rolling(window=66).mean()
 #sma_long.loc[60:180]
 
-
-
-
-
-plt.figure(figsize=(10,6))
-sns.lineplot(x='date', y='adjclose', data=sma_short, color='gold')
-sns.lineplot(x='date', y='adjclose', data=sma_long)
 
 
 
@@ -233,16 +227,16 @@ df_sell = df_sell[~np.isnan(signal_sell)]
 
 
 
-plt.figure(figsize=(10,6))
+px.figure(figsize=(10,6))
 sns.lineplot(x='date', y='adjclose', data=sma_short, color='g', label='短期趨勢')
 sns.lineplot(x='date', y='adjclose', data=sma_long, color='b', label='長期趨勢')
 
-plt.plot(df['date'], df['adjclose'], color='r', alpha=0.5, label='日線')
-plt.scatter(df['date'], signal_buy, c='r', marker='^', s=150)
-plt.scatter(df['date'], signal_sell, c='g', marker='^', s=150)
+px.plot(df['date'], df['adjclose'], color='r', alpha=0.5, label='日線')
+px.scatter(df['date'], signal_buy, c='r', marker='^', s=150)
+px.scatter(df['date'], signal_sell, c='g', marker='^', s=150)
 
-plt.legend()
-st.plotly_chart(plt,)
+px.legend()
+st.plotly_chart(px)
 
 
 # 計算損益(profit/loss)
