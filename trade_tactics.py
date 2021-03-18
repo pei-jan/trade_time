@@ -228,14 +228,15 @@ df_sell = df_sell[~np.isnan(signal_sell)]
 
 
 plt.figure(figsize=(10,6))
-sns.lineplot(x='date', y='adjclose', data=sma_short, color='g', label='短期趨勢')
-sns.lineplot(x='date', y='adjclose', data=sma_long, color='b', label='長期趨勢')
+sns.lineplot(x='date', y='adjclose', data=sma_short, color='g', label='short_term')
+sns.lineplot(x='date', y='adjclose', data=sma_long, color='b', label='long_term')
 
-plt.plot(df['date'], df['adjclose'], color='r', alpha=0.5, label='日線')
+plt.plot(df['date'], df['adjclose'], color='r', alpha=0.5, label='date_price')
 plt.scatter(df['date'], signal_buy, c='r', marker='^', s=150)
 plt.scatter(df['date'], signal_sell, c='g', marker='^', s=150)
 
 plt.legend()
+st.set_option('deprecation.showPyplotGlobalUse', False)
 st.pyplot()
 
 
