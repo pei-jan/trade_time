@@ -158,7 +158,7 @@ import seaborn as sns
 import matplotlib.pyplot as plt
 import numpy as np
 
-df = get_historical_quote(查詢股票 , int(查詢期間))
+df = get_historical_quote(查詢股票 , (查詢期間))
 
 
 
