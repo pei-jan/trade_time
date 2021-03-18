@@ -228,15 +228,16 @@ df_sell = df_sell[~np.isnan(signal_sell)]
 
 
 
+plt.figure(figsize=(10,6))
 sns.lineplot(x='date', y='adjclose', data=sma_short, color='g', label='短期趨勢')
 sns.lineplot(x='date', y='adjclose', data=sma_long, color='b', label='長期趨勢')
 
-px.plot(df['date'], df['adjclose'], color='r', alpha=0.5, label='日線')
-px.scatter(df['date'], signal_buy, c='r', marker='^', s=150)
-px.scatter(df['date'], signal_sell, c='g', marker='^', s=150)
+plt.plot(df['date'], df['adjclose'], color='r', alpha=0.5, label='日線')
+plt.scatter(df['date'], signal_buy, c='r', marker='^', s=150)
+plt.scatter(df['date'], signal_sell, c='g', marker='^', s=150)
 
-px.legend()
-st.plotly_chart(px)
+plt.legend()
+
 
 
 # 計算損益(profit/loss)
