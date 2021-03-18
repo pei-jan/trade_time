@@ -303,8 +303,8 @@ if start:
             elif balance<0: # 買進平倉
                 profit += df_date.loc[row['date'], 'adjclose'] 
             trade_df = pd.DataFrame({'交易日':交易日,'買入價':買入,'賣出價':賣出,'庫存':庫存,'損益':損益})
-            return profit, trade_df
-    
+            return ttprofit, trade_df
+    ttprofit, trade_df = calc_profit()
     st.dataframe(trade_df)
     st.markdown('期間總獲利(每次交易1單位) %.2f'%(ttprofit))
 
