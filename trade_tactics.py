@@ -165,7 +165,7 @@ class Share(object):
 start = st.button("<<START>>")
 if start:
     df = get_historical_quote(查詢股票 , 查詢期間)
-    st.dataframe(df)
+    st.dataframe(df.head(5))
 
 
     sma_short = pd.DataFrame()
