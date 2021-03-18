@@ -304,7 +304,7 @@ if start:
                 profit += df_date.loc[row['date'], 'adjclose'] 
             trade_df = pd.DataFrame({'交易日':交易日,'買入價':買入,'賣出價':賣出,'庫存':庫存,'損益':損益})
             return ttprofit, trade_df
-    ttprofit, trade_df = calc_profit()
+    ttprofit, trade_df = calc_profit(df_buy, df_sell, df, handling_fee=0.0, allow_oversold = True)
     st.dataframe(trade_df)
     st.markdown('期間總獲利(每次交易1單位) %.2f'%(ttprofit))
 
