@@ -157,7 +157,6 @@ import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
 import numpy as np
-import plotly.express as px
 
 df = get_historical_quote(查詢股票 , 查詢期間)
 st.dataframe(df)
@@ -237,7 +236,7 @@ plt.scatter(df['date'], signal_buy, c='r', marker='^', s=150)
 plt.scatter(df['date'], signal_sell, c='g', marker='^', s=150)
 
 plt.legend()
-
+st.pyplot()
 
 
 # 計算損益(profit/loss)
