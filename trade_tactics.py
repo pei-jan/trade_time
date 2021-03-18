@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 # coding: utf-8
 import streamlit as st
-st.title('交易策略實驗室')
 
 import datetime
 import pprint
@@ -16,7 +15,7 @@ import seaborn as sns
 import matplotlib.pyplot as plt
 import numpy as np
 
-
+st.markdown('交易策略實驗室')
 st.markdown('查詢單一股票買賣點')
 
 
