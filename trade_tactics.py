@@ -227,7 +227,7 @@ df_sell = df_sell[~np.isnan(signal_sell)]
 
 
 
-px.figure(figsize=(10,6))
+
 sns.lineplot(x='date', y='adjclose', data=sma_short, color='g', label='短期趨勢')
 sns.lineplot(x='date', y='adjclose', data=sma_long, color='b', label='長期趨勢')
 
