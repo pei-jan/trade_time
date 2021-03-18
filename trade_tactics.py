@@ -293,12 +293,12 @@ if start:
 
 
         if balance>0:   # 賣出平倉
-            profit += df_date.loc[row['date'], 'adjclose']*(1-handling_fee) * balance - cost
-            sell_ += (df_date.loc[row['date'], 'adjclose']*(1-handling_fee))
-            交易日.append(str(row['date'].year)+'-'+str(row['date'].month)+'-'+str(row['date'].day))
+            profit +=  df.iloc[-1]['adjclose']*(1-handling_fee) * balance - cost
+            sell_ += ( df.iloc[-1]['adjclose']*(1-handling_fee))
+            交易日.append(str(df.iloc[-1]['date'].year)+'-'+str(df.iloc[-1]['date'].month)+'-'+str(df.iloc[-1]['date'].day))
             買入.append(0)
-            賣出.append(df_date.loc[row['date'], 'adjclose']*(1-handling_fee))
-            損益.append(df_date.loc[row['date'], 'adjclose']*(1-handling_fee) * balance - cost)
+            賣出.append( df.iloc[-1]['adjclose']*(1-handling_fee))
+            損益.append( df.iloc[-1]['adjclose']*(1-handling_fee) * balance - cost)
             balance -=1
             庫存.append(balance)
 
@@ -306,9 +306,6 @@ if start:
             profit += df_date.loc[row['date'], 'adjclose'] 
         trade_df = pd.DataFrame({'交易日':交易日,'買入價':買入,'賣出價':賣出,'庫存':庫存,'損益':損益})
         return profit, trade_df
-    
-    
-    ttprofit, trade_df = calc_profit(df_buy, df_sell, df, 0.003, False)   
     
     st.dataframe(trade_df)
     st.markdown('期間總獲利(每次交易1單位) %.2f'%(ttprofit))
