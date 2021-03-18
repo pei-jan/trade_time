@@ -157,7 +157,7 @@ class Share(object):
     def _frequency_str(self, frequency_type, frequency):
         return '{1}{0}'.format(frequency_type, frequency)
 
-查詢股票 = st.text_input("輸入查詢股票(如AAPL、TSLA)")
+查詢股票 = st.text_input("輸入查詢股票(如AAPL、0050.TW)")
 查詢期間 = st.number_input("輸入查詢期間(月)(如12代表1年)",value=12)
 
 
@@ -247,36 +247,70 @@ if start:
 
 
     # 計算損益(profit/loss)
-    def calc_profit(df_buy, df_sell, df):
+    # handling_fee：手續費率
+    # allow_oversold：是否允許超賣
+
+    def calc_profit(df_buy, df_sell, df, handling_fee=0.0, allow_oversold = True):
+        買入=[]
+        賣出=[]
+        交易日=[]
+        庫存=[]
+        損益=[]
         df_profit = df_buy.merge(df_sell, on='date', how='outer') 
         df_profit.sort_values(by='date', inplace=True)
-
         df_date = df.set_index('date')
-
         balance=0
         profit=0
         cost=0
+        buy_ = 0
+        sell_ = 0
         for index, row in df_profit.iterrows():
-            if not row['signal_buy'] is None:
+            if not np.isnan(row['signal_buy']):
                 balance+=1
                 cost+=df_date.loc[row['date'], 'adjclose']
-            elif not row['signal_sell'] is None:
+                交易日.append(str(row['date'].year)+'-'+str(row['date'].month)+'-'+str(row['date'].day))
+                買入.append(df_date.loc[row['date'], 'adjclose'])
+                賣出.append(0)
+                庫存.append(balance)
+                損益.append(0)
+            elif not np.isnan(row['signal_sell']):
                 if balance>0:
                     avg_cost = cost / balance
-                    profit += df_date.loc[row['date'], 'adjclose'] - avg_cost
+                    profit += df_date.loc[row['date'], 'adjclose']*(1-handling_fee) - avg_cost
+                    balance-=1
+                    交易日.append(str(row['date'].year)+'-'+str(row['date'].month)+'-'+str(row['date'].day))
+                    買入.append(0)
+                    賣出.append(df_date.loc[row['date'], 'adjclose']*(1-handling_fee))  
+                    庫存.append(balance)
+                    損益.append(df_date.loc[row['date'], 'adjclose']*(1-handling_fee) - avg_cost)
                     cost -= avg_cost
-                else:
-                    profit += df_date.loc[row['date'], 'adjclose']
+                else: # 超賣
+                    # 不允許超賣
+                    if not allow_oversold:
+                        continue    
+                    profit += df_date.loc[row['date'], 'adjclose']*(1-handling_fee)
+                    balance-=1
 
-                balance-=1
 
-        if balance>0:
-            profit += df_date.loc[row['date'], 'adjclose'] * balance - cost
-        elif balance<0:
-            profit += df_date.loc[row['date'], 'adjclose'] * balance
+        if balance>0:   # 賣出平倉
+            profit += df_date.loc[row['date'], 'adjclose']*(1-handling_fee) * balance - cost
+            sell_ += (df_date.loc[row['date'], 'adjclose']*(1-handling_fee))
+            交易日.append(str(row['date'].year)+'-'+str(row['date'].month)+'-'+str(row['date'].day))
+            買入.append(0)
+            賣出.append(df_date.loc[row['date'], 'adjclose']*(1-handling_fee))
+            損益.append(df_date.loc[row['date'], 'adjclose']*(1-handling_fee) * balance - cost)
+            balance -=1
+            庫存.append(balance)
 
-        return profit
-    ttprofit = calc_profit(df_buy, df_sell, df)
+        elif balance<0: # 買進平倉
+            profit += df_date.loc[row['date'], 'adjclose'] 
+        trade_df = pd.DataFrame({'交易日':交易日,'買入價':買入,'賣出價':賣出,'庫存':庫存,'損益':損益})
+        return profit, trade_df
+    
+    
+    ttprofit, trade_df = calc_profit(df_buy, df_sell, df, 0.003, False)   
+    
+    st.dataframe(trade_df)
     st.markdown('期間總獲利(每次交易1單位) %.2f'%(ttprofit))
 
 
