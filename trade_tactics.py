@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 # coding: utf-8
+import streamlit as st
 st.title('交易策略實驗室')
 
 import datetime
@@ -9,7 +10,7 @@ import yaml
 # from yahoo_finance_api2.exceptions import YahooFinanceError
 import pandas as pd
 import numpy as np
-import streamlit as st
+
 import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
