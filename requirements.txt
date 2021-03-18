@@ -2,4 +2,4 @@ pandas
 seaborn
 numpy
 matplotlib
-yaml
+PyYAML
