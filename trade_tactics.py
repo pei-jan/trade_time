@@ -17,7 +17,8 @@ import numpy as np
 
 st.markdown(f'<p><span style = "font-size:24px"><strong>交易策略實驗室</strong></span></p>',unsafe_allow_html=True)
 st.markdown('查詢單一股票買賣點')
-
+查詢股票 = st.text_input("輸入查詢股票(如AAPL、0050.TW)")
+查詢期間 = st.number_input("輸入查詢期間(月)(如12代表1年)",value=12)
 
 PERIOD_TYPE_DAY = 'day'
 PERIOD_TYPE_WEEK = 'week'
@@ -31,27 +32,8 @@ FREQUENCY_TYPE_DAY = 'd'
 FREQUENCY_TYPE_WEEK = 'wk'
 FREQUENCY_TYPE_MONTH = 'mo'
 
-def get_historical_quote(symbol, months):
-    share_object = Share(symbol)
-    # get historical data 
-    symbol_data = share_object.get_historical(PERIOD_TYPE_MONTH,months,FREQUENCY_TYPE_DAY, 1)
-    df=pd.DataFrame(symbol_data)
-    # create date from timestamp column 
-    df['date'] = pd.to_datetime(df['timestamp'],unit='ms').apply(lambda x: x.date())
-    # drop timestamp column 
-    df.drop(['timestamp'], axis=1, inplace=True)
-    # move date column to first column
-    new_sequence = [df.columns[-1]] + [x for x in df.columns[:-1]]
-    df = df[new_sequence] 
-    if symbol.endswith('.TW'):
-        df[['open', 'close', 'high', 'low', 'adjclose']] = df[['open', 'close', 'high', 'low', 'adjclose']].round(2)
-        # df['volume'] = df['volume'].astype(np.int64)
-        # df['open']= np.around(pd['open'], 2)
-        # df['close']= np.around(pd['close'], 2)
-        # df['high']= np.around(pd['high'], 2)
-        # df['low']= np.around(pd['low'], 2)
-        # df['adjclose']= np.around(pd['adjclose'], 2)
-    return df
+
+
 
 class Share(object):
 
@@ -157,9 +139,58 @@ class Share(object):
     def _frequency_str(self, frequency_type, frequency):
         return '{1}{0}'.format(frequency_type, frequency)
 
-查詢股票 = st.text_input("輸入查詢股票(如AAPL、0050.TW)")
-查詢期間 = st.number_input("輸入查詢期間(月)(如12代表1年)",value=12)
 
+def get_historical_quote(symbol, months):
+    share_object = Share(symbol)
+    # get historical data 
+    symbol_data = share_object.get_historical(PERIOD_TYPE_MONTH,months,FREQUENCY_TYPE_DAY, 1)
+    df=pd.DataFrame(symbol_data)
+    # create date from timestamp column 
+    df['date'] = pd.to_datetime(df['timestamp'],unit='ms').apply(lambda x: x.date())
+    # drop timestamp column 
+    df.drop(['timestamp'], axis=1, inplace=True)
+    # move date column to first column
+    new_sequence = [df.columns[-1]] + [x for x in df.columns[:-1]]
+    df = df[new_sequence] 
+    if symbol.endswith('.TW'):
+        df[['open', 'close', 'high', 'low', 'adjclose']] = df[['open', 'close', 'high', 'low', 'adjclose']].round(2)
+        # df['volume'] = df['volume'].astype(np.int64)
+        # df['open']= np.around(pd['open'], 2)
+        # df['close']= np.around(pd['close'], 2)
+        # df['high']= np.around(pd['high'], 2)
+        # df['low']= np.around(pd['low'], 2)
+        # df['adjclose']= np.around(pd['adjclose'], 2)
+    return df
+
+def buy_sell(df):
+    signal_buy = []  # 買點價格
+    signal_sell = [] # 賣點價格
+
+    flag=-1          # 買賣點旗標，短期超過長期為1，反之為0
+
+    # 掃描每一筆資料
+    for index, row in df.iterrows():
+        # 短期超過長期
+        if row[df.columns[1]] > row[df.columns[2]]:
+            if flag!=1: # 之前的短期未超過長期，即黃金交叉
+                signal_buy.append(row[df.columns[3]])
+                signal_sell.append(np.nan)
+                flag=1
+            else:
+                signal_buy.append(np.nan)
+                signal_sell.append(np.nan)
+        elif row[df.columns[1]] < row[df.columns[2]]:
+            if flag!=0: # 之前的長期未超過短期，即死亡交叉
+                signal_buy.append(np.nan)
+                signal_sell.append(row[df.columns[3]])
+                flag=0
+            else:
+                signal_buy.append(np.nan)
+                signal_sell.append(np.nan)
+        else:
+            signal_buy.append(np.nan)
+            signal_sell.append(np.nan)
+    return (signal_buy, signal_sell)
 
 
 start = st.button("<<START>>")
@@ -178,40 +209,6 @@ if start:
     sma_long['date'] = df['date']
     sma_long['adjclose'] = df['adjclose'].rolling(window=66).mean()
     #sma_long.loc[60:180]
-
-
-
-
-    def buy_sell(df):
-        signal_buy = []  # 買點價格
-        signal_sell = [] # 賣點價格
-
-        flag=-1          # 買賣點旗標，短期超過長期為1，反之為0
-
-        # 掃描每一筆資料
-        for index, row in df.iterrows():
-            # 短期超過長期
-            if row[df.columns[1]] > row[df.columns[2]]:
-                if flag!=1: # 之前的短期未超過長期，即黃金交叉
-                    signal_buy.append(row[df.columns[3]])
-                    signal_sell.append(np.nan)
-                    flag=1
-                else:
-                    signal_buy.append(np.nan)
-                    signal_sell.append(np.nan)
-            elif row[df.columns[1]] < row[df.columns[2]]:
-                if flag!=0: # 之前的長期未超過短期，即死亡交叉
-                    signal_buy.append(np.nan)
-                    signal_sell.append(row[df.columns[3]])
-                    flag=0
-                else:
-                    signal_buy.append(np.nan)
-                    signal_sell.append(np.nan)
-            else:
-                signal_buy.append(np.nan)
-                signal_sell.append(np.nan)
-        return (signal_buy, signal_sell)
-
 
     # 合併短期與長期移動平均線
     df_new = sma_short.copy()
@@ -290,21 +287,25 @@ if start:
                         continue    
                     profit += df_date.loc[row['date'], 'adjclose']*(1-handling_fee)
                     balance-=1
-            if balance>0:   # 賣出平倉
-                profit +=  df.iloc[-1]['adjclose']*(1-handling_fee) * balance - cost
-                sell_ += ( df.iloc[-1]['adjclose']*(1-handling_fee))
-                交易日.append(str(df.iloc[-1]['date'].year)+'-'+str(df.iloc[-1]['date'].month)+'-'+str(df.iloc[-1]['date'].day))
-                買入.append(0)
-                賣出.append( df.iloc[-1]['adjclose']*(1-handling_fee))
-                損益.append( df.iloc[-1]['adjclose']*(1-handling_fee) * balance - cost)
-                balance -=1
-                庫存.append(balance)
 
-            elif balance<0: # 買進平倉
-                profit += df_date.loc[row['date'], 'adjclose'] 
-           trade_df = pd.DataFrame({'交易日':交易日,'買入價':買入,'賣出價':賣出,'庫存':庫存,'損益':損益})
-           return profit, trade_df
-    ttprofit, trade_df = calc_profit(df_buy, df_sell, df, handling_fee=0.0, allow_oversold = False)
+
+        if balance>0:   # 賣出平倉
+            profit +=  df.iloc[-1]['adjclose']*(1-handling_fee) * balance - cost
+            sell_ += ( df.iloc[-1]['adjclose']*(1-handling_fee))
+            交易日.append(str(df.iloc[-1]['date'].year)+'-'+str(df.iloc[-1]['date'].month)+'-'+str(df.iloc[-1]['date'].day))
+            買入.append(0)
+            賣出.append( df.iloc[-1]['adjclose']*(1-handling_fee))
+            損益.append( df.iloc[-1]['adjclose']*(1-handling_fee) * balance - cost)
+            balance -=1
+            庫存.append(balance)
+
+        elif balance<0: # 買進平倉
+            profit += df_date.loc[row['date'], 'adjclose'] 
+        trade_df = pd.DataFrame({'交易日':交易日,'買入價':買入,'賣出價':賣出,'庫存':庫存,'損益':損益})
+        return profit, trade_df
+
+
+    ttprofit, trade_df = calc_profit(df_buy, df_sell, df, 0.003, False)
     st.dataframe(trade_df)
     st.markdown('期間總獲利(每次交易1單位) %.2f'%(ttprofit))
 
