@@ -17,14 +17,15 @@ import numpy as np
 
 st.markdown(f'<p><span style = "font-size:24px"><strong>交易策略分析</strong></span></p>',unsafe_allow_html=True)
 st.markdown('查詢單一股票買賣點')
-查詢股票 = st.text_input("輸入查詢股票(可查詢台/美股如0050、AAPL)")
+查詢股票 = st.text_input("輸入查詢股票(即時查詢台股/美股，ex:0050、AAPL)")
 try:
     if 查詢股票[0].isdigit():
         查詢股票 += '.TW'
 except:
     pass
 查詢期間 = st.number_input("輸入查詢期間(月)(如12代表1年)",value=12)
-
+long_day = st.number_input("輸入長天期移動平均天數(預設66天)",value=66)
+short_day = st.number_input("輸入短天期移動平均天數(預設22天)",value=22)
 PERIOD_TYPE_DAY = 'day'
 PERIOD_TYPE_WEEK = 'week'
 PERIOD_TYPE_MONTH = 'month'
@@ -206,13 +207,13 @@ if start:
 
     sma_short = pd.DataFrame()
     sma_short['date'] = df['date']
-    sma_short['adjclose'] = df['adjclose'].rolling(window=22).mean()
+    sma_short['adjclose'] = df['adjclose'].rolling(window=short_day).mean()
     #sma_short.loc[15:30]
 
 
     sma_long = pd.DataFrame()
     sma_long['date'] = df['date']
-    sma_long['adjclose'] = df['adjclose'].rolling(window=66).mean()
+    sma_long['adjclose'] = df['adjclose'].rolling(window=long_day).mean()
     #sma_long.loc[60:180]
 
     # 合併短期與長期移動平均線
@@ -236,10 +237,11 @@ if start:
 
 
     plt.figure(figsize=(10,6))
-    sns.lineplot(x='date', y='adjclose', data=sma_short, color='g', label='short_term')
+    plt.style.use('bmh')
+    sns.lineplot(x='date', y='adjclose', data=sma_short, color='r', label='short_term')
     sns.lineplot(x='date', y='adjclose', data=sma_long, color='b', label='long_term')
 
-    plt.plot(df['date'], df['adjclose'], color='r', alpha=0.5, label='date_price')
+    plt.plot(df['date'], df['adjclose'], color='gray', alpha=0.5, label='date_price',linewidth=3.0)
     plt.scatter(df['date'], signal_buy, c='r', marker='^', s=150)
     plt.scatter(df['date'], signal_sell, c='g', marker='^', s=150)
 
