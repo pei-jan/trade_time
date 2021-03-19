@@ -18,8 +18,11 @@ import numpy as np
 st.markdown(f'<p><span style = "font-size:24px"><strong>交易策略分析</strong></span></p>',unsafe_allow_html=True)
 st.markdown('查詢單一股票買賣點')
 查詢股票 = st.text_input("輸入查詢股票(可查詢台/美股如0050、AAPL)")
-if 查詢股票[0].isdigit():
-    查詢股票 += '.TW'
+try:
+    if 查詢股票[0].isdigit():
+        查詢股票 += '.TW'
+except:
+    pass
 查詢期間 = st.number_input("輸入查詢期間(月)(如12代表1年)",value=12)
 
 PERIOD_TYPE_DAY = 'day'
