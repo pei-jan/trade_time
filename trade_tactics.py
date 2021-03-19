@@ -244,7 +244,8 @@ if start:
     plt.plot(df['date'], df['adjclose'], color='gray', alpha=0.5, label='date_price',linewidth=3.0)
     plt.scatter(df['date'], signal_buy, c='r', marker='^', s=150)
     plt.scatter(df['date'], signal_sell, c='g', marker='^', s=150)
-
+    plt.ylabel('price')
+    
     plt.legend()
     st.set_option('deprecation.showPyplotGlobalUse', False)
     st.pyplot()
