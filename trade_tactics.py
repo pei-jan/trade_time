@@ -310,6 +310,11 @@ if start:
         elif balance<0: # 買進平倉
             profit += df_date.loc[row['date'], 'adjclose'] 
         trade_df = pd.DataFrame({'交易日':交易日,'買入價':買入,'賣出價':賣出,'庫存':庫存,'損益':損益})
+        
+        def color_negative_red(val):
+            color = 'red' if val < 0 else 'black'
+            return 'color: %s' % color
+        trade_df.style.apply(color_negative_red)
         return profit, trade_df
 
 
