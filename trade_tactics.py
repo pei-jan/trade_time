@@ -314,7 +314,7 @@ if start:
         def color_negative_red(val):
             color = 'red' if val < 0 else 'black'
             return 'color: %s' % color
-        trade_df.style.applymap(color_negative_red,subset=['損益']).\
+        trade_df = trade_df.style.applymap(color_negative_red,subset=['損益']).\
                  format("{:.2f}",subset=['買入價','賣出價','損益'])
         return profit, trade_df
 
