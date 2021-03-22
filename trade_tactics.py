@@ -202,7 +202,8 @@ def buy_sell(df):
 start = st.button("<<START>>")
 if start:
     df = get_historical_quote(查詢股票 , 查詢期間)
-    st.dataframe(df.tail(5))
+    st.dataframe(df.tail(5).style.format("{:.2f}",
+                                         subset=['open','close','high','low','adjclose','volume']))
 
 
     sma_short = pd.DataFrame()
